@@ -1,4 +1,5 @@
 using System;
+using AutoMapper;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,6 +33,7 @@ namespace StorageApi
         databaseSettings = serviceProvider.GetRequiredService<IOptions<DatabaseSettings>>().Value;
         return databaseSettings;
       });
+      services.AddAutoMapper(typeof(Startup));
 
       services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
 

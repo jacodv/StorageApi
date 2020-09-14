@@ -26,16 +26,16 @@ namespace StorageApi.Controllers
     }
     // GET: api/<LocationController>
     [HttpGet]
-    public IEnumerable<DocumentReference> Get()
+    public IEnumerable<LocationModel> Get()
     {
-      return _locations.AsQueryable().Take(50).ToList().Select(s=>s.ToReference());
+      return _mapper.Map<IEnumerable<Location>, IEnumerable<LocationModel>>(_locations.AsQueryable().Take(50).ToList());
     }
 
     // GET api/<LocationController>/5
     [HttpGet("{id}")]
-    public async Task<Location> Get(string id)
+    public async Task<LocationModel> Get(string id)
     {
-      return await _locations.FindByIdAsync(id);
+      return _mapper.Map<Location,LocationModel>(await _locations.FindByIdAsync(id));
     }
 
     // POST api/<LocationController>
