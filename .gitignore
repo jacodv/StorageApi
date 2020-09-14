@@ -1,3 +1,4 @@
-/src/StorageApi/bin
+bin
 obj
-/src/*.user
+*.user
+*.suo
