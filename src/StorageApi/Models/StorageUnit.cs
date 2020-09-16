@@ -16,4 +16,10 @@ namespace StorageApi.Models
     public List<StorageRow> StorageRows { get; set; }
     public IDocumentReference Location { get; set; }
   }
+
+  public class StorageInsertUpdateModel
+  {
+    public string Name { get; set; }
+
+  }
 }

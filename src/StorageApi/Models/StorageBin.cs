@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using FluentValidation;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Repositories;
 using MongoDB.Repositories.Attributes;
@@ -24,6 +26,40 @@ namespace StorageApi.Models
         return Contents?.Sum(_ => _.TotalWeight) ?? 0;
       }
     }
+  }
 
+  public class StorageBinInsertUpdateModel
+  {
+    public string Name { get; set; }
+    public List<StorageBinContentModel> Contents { get; set; }
+  }
+
+  public class StorageBinModel: StorageBinInsertUpdateModel
+  {
+    public string Id { get; set; }
+    public double Weight { get; set; }
+  }
+
+  public class StorageBinValidator : AbstractValidator<StorageBinInsertUpdateModel>
+  {
+    public StorageBinValidator()
+    {
+      RuleFor(_ => _.Name).NotEmpty();
+    }
+  }
+
+  public class StorageBinProfile : Profile
+  {
+    public StorageBinProfile()
+    {
+      CreateMap<StorageBin, StorageBinModel>();
+      CreateMap<StorageBinContentInsertUpdateModel, StorageBin>()
+        .ForMember(
+          _ => _.Id,
+          opt => opt.Ignore())
+        .ForMember(
+        _ => _.Weight,
+        opt => opt.Ignore());
+    }
   }
 }
