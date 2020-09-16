@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using MongoDB.Driver;
+using MongoDB.Repositories;
+using MongoDB.Repositories.Interfaces;
 using StorageApi.Models;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Repositories.Interfaces;
 
-
-namespace StorageApi.Data
+namespace StorageApi.Setup
 {
   public static class SetupDatabase
   {

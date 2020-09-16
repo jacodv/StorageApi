@@ -7,9 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using MongoDB.Repositories.Interfaces;
+using MongoDB.Repositories.Settings;
 using StorageApi.Data;
-using StorageApi.Interfaces;
-using StorageApi.Settings;
 
 namespace StorageApi
 {

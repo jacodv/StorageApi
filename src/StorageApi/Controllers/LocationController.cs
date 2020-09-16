@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
-using StorageApi.Helpers;
-using StorageApi.Interfaces;
+using MongoDB.Repositories;
+using MongoDB.Repositories.Interfaces;
 using StorageApi.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -14,45 +14,55 @@ namespace StorageApi.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class LocationController : ControllerBase
+  public class LocationController : CrudController<Location, LocationModel, LocationInsertUpdateModel>
   {
-    private readonly IRepository<Location> _locations;
+    public LocationController(IRepository<Location> locations, IMapper mapper)
+    : base(locations, mapper)
+    {
+      
+    }  
+  }
+
+  public abstract class CrudController<TDal, TModel, TUpInsModel> : ControllerBase
+  where TDal:Document
+  {
+    private readonly IRepository<TDal> _repository;
     private readonly IMapper _mapper;
 
-    public LocationController(IRepository<Location> locations, IMapper mapper)
+    protected CrudController(IRepository<TDal> repository, IMapper mapper)
     {
-      _locations = locations;
+      _repository = repository;
       _mapper = mapper;
     }
     // GET: api/<LocationController>
     [HttpGet]
-    public IEnumerable<LocationModel> Get()
+    public IEnumerable<TModel> Get()
     {
-      return _mapper.Map<IEnumerable<Location>, IEnumerable<LocationModel>>(_locations.AsQueryable().Take(50).ToList());
+      return _mapper.Map<IEnumerable<TDal>, IEnumerable<TModel>>(_repository.AsQueryable().Take(50).ToList());
     }
 
     // GET api/<LocationController>/5
     [HttpGet("{id}")]
-    public async Task<LocationModel> Get(string id)
+    public async Task<TModel> Get(string id)
     {
-      return _mapper.Map<Location,LocationModel>(await _locations.FindByIdAsync(id));
+      return _mapper.Map<TDal, TModel>(await _repository.FindByIdAsync(id));
     }
 
     // POST api/<LocationController>
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] LocationInsertUpdateModel model)
+    public async Task<IActionResult> Post([FromBody] TUpInsModel model)
     {
-      await _locations.InsertOneAsync(_mapper.Map<LocationInsertUpdateModel, Location>(model));
+      await _repository.InsertOneAsync(_mapper.Map<TUpInsModel, TDal>(model));
       return Ok();
     }
 
     // PUT api/<LocationController>/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> Put(string id, [FromBody] LocationInsertUpdateModel model)
+    public async Task<IActionResult> Put(string id, [FromBody] TUpInsModel model)
     {
-      var itemToUpdate = _mapper.Map<LocationInsertUpdateModel, Location>(model);
+      var itemToUpdate = _mapper.Map<TUpInsModel, TDal>(model);
       itemToUpdate.Id = ObjectId.Parse(id);
-      await _locations.ReplaceOneAsync(itemToUpdate);
+      await _repository.ReplaceOneAsync(itemToUpdate);
       return Ok();
     }
 
@@ -60,7 +70,7 @@ namespace StorageApi.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-      await _locations.DeleteByIdAsync(id);
+      await _repository.DeleteByIdAsync(id);
       return Ok();
     }
   }

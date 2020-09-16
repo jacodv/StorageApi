@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
-using StorageApi.Data;
-using StorageApi.Interfaces;
+using MongoDB.Repositories;
+using MongoDB.Repositories.Attributes;
+using MongoDB.Repositories.Interfaces;
 
 namespace StorageApi.Models
 {

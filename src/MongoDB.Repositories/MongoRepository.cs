@@ -8,7 +8,7 @@ using MongoDB.Driver;
 using MongoDB.Repositories.Attributes;
 using MongoDB.Repositories.Interfaces;
 
-namespace StorageApi.Data
+namespace MongoDB.Repositories
 {
   public class MongoRepository<TDocument> : IRepository<TDocument>
     where TDocument : IDocument

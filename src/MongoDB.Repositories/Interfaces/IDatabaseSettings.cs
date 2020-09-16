@@ -1,4 +1,4 @@
-﻿namespace StorageApi.Interfaces
+﻿namespace MongoDB.Repositories.Interfaces
 {
   public interface IDatabaseSettings
   {

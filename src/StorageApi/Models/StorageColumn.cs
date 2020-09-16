@@ -1,4 +1,4 @@
-﻿using StorageApi.Interfaces;
+﻿using MongoDB.Repositories;
 
 namespace StorageApi.Models
 {

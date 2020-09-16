@@ -1,6 +1,6 @@
-﻿using StorageApi.Interfaces;
+﻿using MongoDB.Repositories.Interfaces;
 
-namespace StorageApi.Settings
+namespace MongoDB.Repositories.Settings
 {
   public class DatabaseSettings : IDatabaseSettings
   {

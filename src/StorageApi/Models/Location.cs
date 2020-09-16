@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using FluentValidation;
-using StorageApi.Data;
+using MongoDB.Repositories;
+using MongoDB.Repositories.Attributes;
+using MongoDB.Repositories.Interfaces;
 using StorageApi.Interfaces;
 
 namespace StorageApi.Models

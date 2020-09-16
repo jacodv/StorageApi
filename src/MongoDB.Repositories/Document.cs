@@ -1,8 +1,8 @@
 ﻿using System;
 using MongoDB.Bson;
-using StorageApi.Interfaces;
+using MongoDB.Repositories.Interfaces;
 
-namespace StorageApi.Models
+namespace MongoDB.Repositories
 {
   public abstract class Document : IDocument
   {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StorageApi.Data
+namespace MongoDB.Repositories.Attributes
 {
   [AttributeUsage(AttributeTargets.Class, Inherited = false)]
   public class BsonCollectionAttribute : Attribute

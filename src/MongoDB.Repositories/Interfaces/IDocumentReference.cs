@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace StorageApi.Interfaces
+namespace MongoDB.Repositories.Interfaces
 {
   public interface IDocumentReference
   {
