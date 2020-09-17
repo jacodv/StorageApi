@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Repositories;
 using MongoDB.Repositories.Interfaces;
@@ -14,11 +15,14 @@ namespace StorageApi.Controllers
   {
     private readonly IRepository<TDal> _repository;
     private readonly IMapper _mapper;
+    private readonly ILogger<CrudController<TDal, TModel, TUpInsModel>> _logger;
 
-    protected CrudController(IRepository<TDal> repository, IMapper mapper)
+    protected CrudController(IRepository<TDal> repository, IMapper mapper, ILogger<CrudController<TDal, TModel, TUpInsModel>> logger)
     {
       _repository = repository;
       _mapper = mapper;
+      _logger = logger;
+      _logger.LogInformation("Info from controller");
     }
     // GET: api/<LocationController>
     [HttpGet]
@@ -38,6 +42,9 @@ namespace StorageApi.Controllers
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] TUpInsModel model)
     {
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
+
       await _repository.InsertOneAsync(_mapper.Map<TUpInsModel, TDal>(model));
       return Ok();
     }
@@ -46,6 +53,9 @@ namespace StorageApi.Controllers
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(string id, [FromBody] TUpInsModel model)
     {
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
+
       var itemToUpdate = _mapper.Map<TUpInsModel, TDal>(model);
       itemToUpdate.Id = ObjectId.Parse(id);
       await _repository.ReplaceOneAsync(itemToUpdate);

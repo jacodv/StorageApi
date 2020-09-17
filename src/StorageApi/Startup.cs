@@ -6,10 +6,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Repositories.Interfaces;
 using MongoDB.Repositories.Settings;
+using Serilog;
 using StorageApi.Data;
+using StorageApi.Models;
 
 namespace StorageApi
 {
@@ -41,13 +44,16 @@ namespace StorageApi
         .AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null)
         .AddFluentValidation(opt =>
         {
-          opt.AutomaticValidationEnabled = true;
+          opt.RegisterValidatorsFromAssemblyContaining<Startup>();
+          opt.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
         });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
     {
+      loggerFactory.AddSerilog();
+
       SetupDatabase.Init(serviceProvider).Wait();
 
       if (env.IsDevelopment())

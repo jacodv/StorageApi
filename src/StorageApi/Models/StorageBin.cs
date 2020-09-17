@@ -6,6 +6,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Repositories;
 using MongoDB.Repositories.Attributes;
 using MongoDB.Repositories.Interfaces;
+using StorageApi.Interfaces;
 
 namespace StorageApi.Models
 {
@@ -16,7 +17,6 @@ namespace StorageApi.Models
     {
       Contents = new List<StorageBinContent>();
     }
-    public string Name { get; set; }
     public List<StorageBinContent> Contents { get; set; }
     [BsonIgnore]
     public double Weight
@@ -28,7 +28,7 @@ namespace StorageApi.Models
     }
   }
 
-  public class StorageBinInsertUpdateModel
+  public class StorageBinInsertUpdateModel:IHasName
   {
     public string Name { get; set; }
     public List<StorageBinContentModel> Contents { get; set; }

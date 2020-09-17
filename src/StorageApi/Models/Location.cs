@@ -10,16 +10,13 @@ namespace StorageApi.Models
   [BsonCollection("Location")]
   public class Location : Document, IDocumentReference
   {
-    public string Name { get; set; }
   }
 
-  public class LocationModel : IReferenceModel
+  public class LocationModel : DocumentReferenceModel
   {
-    public string Id { get; set; }
-    public string Name { get; set; }
   }
 
-  public class LocationInsertUpdateModel
+  public class LocationInsertUpdateModel: IHasName
   {
     public string Name { get; set; }
   }
