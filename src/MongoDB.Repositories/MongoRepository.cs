@@ -11,21 +11,23 @@ using Microsoft.Extensions.Logging;
 
 namespace MongoDB.Repositories
 {
-  public class MongoRepository<TDocument> : IRepository<TDocument>
+  public class MongoRepository<TDocument> : IRepository<TDocument>, IDisposable
     where TDocument : IDocument
   {
-    private Task _watcher;
+    private readonly Task _watcher;
     public readonly IMongoCollection<TDocument> Collection;
     private readonly ILogger<MongoRepository<TDocument>> _logger;
-    private readonly IMongoCollection<ChangeStreamDocument<TDocument>> _auditCollection;
+    private readonly IUserSession _userSession;
+    private readonly IMongoCollection<CollectionAuditDocument> _auditCollection;
 
-    public MongoRepository(IDatabaseSettings settings, ILogger<MongoRepository<TDocument>> logger )
+    public MongoRepository(IDatabaseSettings settings, ILogger<MongoRepository<TDocument>> logger, IUserSession userSession)
     {
       _logger = logger;
+      _userSession = userSession;
       var database = new MongoClient(settings.ConnectionString).GetDatabase(settings.DatabaseName);
       var collectionName = GetCollectionName(typeof(TDocument));
       Collection = database.GetCollection<TDocument>(collectionName);
-      _auditCollection = database.GetCollection<ChangeStreamDocument<TDocument>>($"{collectionName}Audit");
+      _auditCollection = database.GetCollection<CollectionAuditDocument>($"Audit");
       _watcher = _addWatcher();
     }
 
@@ -77,79 +79,107 @@ namespace MongoDB.Repositories
     }
 
 
-    public virtual void InsertOne(TDocument document)
+    public virtual TDocument InsertOne(TDocument document)
     {
+      _setInsertState(document);
       Collection.InsertOne(document);
+      return document;
     }
-    public virtual Task InsertOneAsync(TDocument document)
+    public async Task<TDocument> InsertOneAsync(TDocument document)
     {
-      return Task.Run(() => Collection.InsertOneAsync(document));
+      _setInsertState(document);
+      await Collection.InsertOneAsync(document);
+      return document;
     }
-    public void InsertMany(ICollection<TDocument> documents)
+    public IEnumerable<TDocument> InsertMany(ICollection<TDocument> documents)
     {
+      foreach (var document in documents)
+      {
+        _setInsertState(document);
+      }
       Collection.InsertMany(documents);
+      return documents;
     }
-    public virtual async Task InsertManyAsync(ICollection<TDocument> documents)
+    public async Task<IEnumerable<TDocument>> InsertManyAsync(ICollection<TDocument> documents)
     {
+      foreach (var document in documents)
+      {
+        _setInsertState(document);
+      }
       await Collection.InsertManyAsync(documents);
+      return documents;
     }
 
-    public void ReplaceOne(TDocument document)
+    public TDocument ReplaceOne(TDocument document)
     {
+      _setUpdateState(document);
       var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, document.Id);
       Collection.FindOneAndReplace(filter, document);
+      return document;
     }
-    public virtual async Task ReplaceOneAsync(TDocument document)
+    public async Task<TDocument> ReplaceOneAsync(TDocument document)
     {
+      _setInsertState(document);
       var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, document.Id);
       await Collection.FindOneAndReplaceAsync(filter, document);
+      return document;
     }
 
-    public void DeleteOne(Expression<Func<TDocument, bool>> filterExpression)
+    public TDocument DeleteOne(Expression<Func<TDocument, bool>> filterExpression)
     {
-      Collection.FindOneAndDelete(filterExpression);
+      return Collection.FindOneAndDelete(filterExpression);
     }
-    public Task DeleteOneAsync(Expression<Func<TDocument, bool>> filterExpression)
+    public async Task<TDocument> DeleteOneAsync(Expression<Func<TDocument, bool>> filterExpression)
     {
-      return Task.Run(() => Collection.FindOneAndDeleteAsync(filterExpression));
+      return await Collection.FindOneAndDeleteAsync(filterExpression);
     }
-    public void DeleteById(string id)
+    public TDocument DeleteById(string id)
     {
       var objectId = new ObjectId(id);
       var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
-      Collection.FindOneAndDelete(filter);
+      return Collection.FindOneAndDelete(filter);
     }
-    public Task DeleteByIdAsync(string id)
+    public async Task<TDocument> DeleteByIdAsync(string id)
     {
-      return Task.Run(() =>
-      {
         var objectId = new ObjectId(id);
         var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
-        Collection.FindOneAndDeleteAsync(filter);
-      });
+        return await Collection.FindOneAndDeleteAsync(filter);
     }
-    public void DeleteMany(Expression<Func<TDocument, bool>> filterExpression)
+    public long DeleteMany(Expression<Func<TDocument, bool>> filterExpression)
     {
-      Collection.DeleteMany(filterExpression);
+      var result = Collection.DeleteMany(filterExpression);
+      return result.DeletedCount;
     }
-    public Task DeleteManyAsync(Expression<Func<TDocument, bool>> filterExpression)
+    public async Task<long> DeleteManyAsync(Expression<Func<TDocument, bool>> filterExpression)
     {
-      return Task.Run(() => Collection.DeleteManyAsync(filterExpression));
+      var result =  await Collection.DeleteManyAsync(filterExpression);
+      return result.DeletedCount;
     }
 
-
+    #region Private
+    private void _setInsertState(TDocument document)
+    {
+      document.CreatedBy = _userSession.GetUserName();
+      document.UpdatedAt = null;
+      document.CreatedBy = null;
+    }
+    private void _setUpdateState(TDocument document)
+    {
+      document.UpdatedAt = DateTime.Now;
+      document.UpdatedBy = _userSession.GetUserName();
+    }
     private async Task _addWatcher()
     {
       _logger.LogDebug($"Watcher started");
 
-      var indexKeys = Builders<ChangeStreamDocument<TDocument>>.IndexKeys.Ascending(x => x.ClusterTime);
+      var indexKeys = Builders<CollectionAuditDocument>.IndexKeys.Ascending(x => x.CreatedAt);
       var indexOptions = new CreateIndexOptions()
       {
-        Name = "ClusterTime",
+        Name = "CreatedAt",
         Unique = false,
         ExpireAfter = TimeSpan.FromDays(30)
       };
-      var createIndexModel = new CreateIndexModel<ChangeStreamDocument<TDocument>>(indexKeys, indexOptions);
+      var createIndexModel = new CreateIndexModel<CollectionAuditDocument>(indexKeys, indexOptions);
       await _auditCollection.Indexes.CreateOneAsync(createIndexModel);
 
       //Get the whole document instead of just the changed portion
@@ -166,12 +196,27 @@ namespace MongoDB.Repositories
       {
         await cursor.ForEachAsync(change =>
         {
+          var auditDocument = new CollectionAuditDocument()
+          {
+            DocumentKey = change.DocumentKey,
+            OperationType = change.OperationType,
+            BackingDocument = change.BackingDocument,
+            CollectionNamespace = change.CollectionNamespace,
+            FullDocument = change.FullDocument,
+            UpdateDescription = change.UpdateDescription,
+          };
           // process change event
-          _auditCollection.InsertOne(change);
+          _auditCollection.InsertOne(auditDocument);
           _logger.LogDebug($"{change.OperationType} on {change.DocumentKey}");
 
         });
       }
+    }
+    #endregion
+
+    public void Dispose()
+    {
+      _watcher?.Dispose();
     }
   }
 }

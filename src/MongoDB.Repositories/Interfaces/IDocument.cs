@@ -9,6 +9,10 @@ namespace MongoDB.Repositories.Interfaces
     [BsonId]
     [BsonRepresentation(BsonType.String)]
     ObjectId Id { get; set; }
+    string Name { get; set; }
     DateTime CreatedAt { get; }
+    string CreatedBy { get; set; }
+    DateTime? UpdatedAt { get; set; }
+    string? UpdatedBy { get; set; }
   }
 }

@@ -107,11 +107,12 @@ namespace StorageApi.Tests
     public async Task Post_GivenNewItem_Should_ReturnInsert()
     {
       var listOfItems = new List<TDal>();
+      var insertedItem = NewItem();
       var newItem = ToBeInsertedItem();
 
       _mockRepository
         .Setup(mc => mc.InsertOneAsync(It.IsAny<TDal>()))
-        .Returns(Task.CompletedTask)
+        .Returns(Task.FromResult(insertedItem))
         .Callback<TDal>(listOfItems.Add);
 
       // Action
@@ -130,7 +131,7 @@ namespace StorageApi.Tests
 
       _mockRepository
         .Setup(mc => mc.ReplaceOneAsync(It.IsAny<TDal>()))
-        .Returns(Task.CompletedTask)
+        .Returns(Task.FromResult(itemSetup))
         .Callback<TDal>(updated =>
         {
           itemSetup.Name = updated.Name;
@@ -154,7 +155,7 @@ namespace StorageApi.Tests
 
       _mockRepository
         .Setup(mc => mc.DeleteByIdAsync(It.IsAny<string>()))
-        .Returns(Task.CompletedTask)
+        .Returns(Task.FromResult(itemSetup))
         .Callback<string>(id => listOfItems.Remove(id));
 
       // Action

@@ -2,6 +2,7 @@
 using MongoDB.Repositories;
 using MongoDB.Repositories.Attributes;
 using MongoDB.Repositories.Interfaces;
+using StorageApi.Interfaces;
 
 namespace StorageApi.Models
 {
@@ -16,7 +17,7 @@ namespace StorageApi.Models
     public IDocumentReference Location { get; set; }
   }
 
-  public class StorageInsertUpdateModel
+  public class StorageInsertUpdateModel:IHasName
   {
     public string Name { get; set; }
 

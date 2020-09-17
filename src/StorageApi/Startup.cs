@@ -8,11 +8,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Repositories;
 using MongoDB.Repositories.Interfaces;
 using MongoDB.Repositories.Settings;
 using Serilog;
 using StorageApi.Data;
 using StorageApi.Models;
+using StorageApi.Services;
 
 namespace StorageApi
 {
@@ -37,6 +39,7 @@ namespace StorageApi
         return databaseSettings;
       });
       services.AddAutoMapper(typeof(Startup));
+      services.AddScoped<IUserSession>(provider => new UserSession());
 
       services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
 
