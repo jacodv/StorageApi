@@ -8,27 +8,29 @@ using MongoDB.Driver;
 using MongoDB.Repositories.Attributes;
 using MongoDB.Repositories.Interfaces;
 using Microsoft.Extensions.Logging;
+using MongoDB.Repositories.Services;
 
 namespace MongoDB.Repositories
 {
-  public class MongoRepository<TDocument> : IRepository<TDocument>, IDisposable
+  public class MongoRepository<TDocument> : IRepository<TDocument>
     where TDocument : IDocument
   {
-    private readonly Task _watcher;
     public readonly IMongoCollection<TDocument> Collection;
     private readonly ILogger<MongoRepository<TDocument>> _logger;
     private readonly IUserSession _userSession;
-    private readonly IMongoCollection<CollectionAuditDocument> _auditCollection;
 
-    public MongoRepository(IDatabaseSettings settings, ILogger<MongoRepository<TDocument>> logger, IUserSession userSession)
+    public MongoRepository(IDatabaseSettings settings, 
+      ILogger<MongoRepository<TDocument>> logger, 
+      IUserSession userSession)
     {
       _logger = logger;
       _userSession = userSession;
       var database = new MongoClient(settings.ConnectionString).GetDatabase(settings.DatabaseName);
       var collectionName = GetCollectionName(typeof(TDocument));
       Collection = database.GetCollection<TDocument>(collectionName);
-      _auditCollection = database.GetCollection<CollectionAuditDocument>($"Audit");
-      _watcher = _addWatcher();
+      //_logger.LogInformation($"Adding collection audit: {collectionName}");
+      //auditService.AddCollectionToAudit(Collection);
+      //_logger.LogInformation($"Added collection audit: {collectionName}");
     }
 
     private protected string GetCollectionName(Type documentType)
@@ -168,55 +170,6 @@ namespace MongoDB.Repositories
       document.UpdatedAt = DateTime.Now;
       document.UpdatedBy = _userSession.GetUserName();
     }
-    private async Task _addWatcher()
-    {
-      _logger.LogDebug($"Watcher started");
-
-      var indexKeys = Builders<CollectionAuditDocument>.IndexKeys.Ascending(x => x.CreatedAt);
-      var indexOptions = new CreateIndexOptions()
-      {
-        Name = "CreatedAt",
-        Unique = false,
-        ExpireAfter = TimeSpan.FromDays(30)
-      };
-      var createIndexModel = new CreateIndexModel<CollectionAuditDocument>(indexKeys, indexOptions);
-      await _auditCollection.Indexes.CreateOneAsync(createIndexModel);
-
-      //Get the whole document instead of just the changed portion
-      var options = new ChangeStreamOptions()
-      {
-        FullDocument = ChangeStreamFullDocumentOption.Default
-      };
-
-      //The operationType can be one of the following: insert, update, replace, delete, invalidate
-      var pipeline = new EmptyPipelineDefinition<ChangeStreamDocument<TDocument>>()
-        .Match("{ operationType: { $in: [ 'replace', 'insert', 'update', 'delete' ] } }");
-
-      using (var cursor = await Collection.WatchAsync(pipeline, options))
-      {
-        await cursor.ForEachAsync(change =>
-        {
-          var auditDocument = new CollectionAuditDocument()
-          {
-            DocumentKey = change.DocumentKey,
-            OperationType = change.OperationType,
-            BackingDocument = change.BackingDocument,
-            CollectionNamespace = change.CollectionNamespace,
-            FullDocument = change.FullDocument,
-            UpdateDescription = change.UpdateDescription,
-          };
-          // process change event
-          _auditCollection.InsertOne(auditDocument);
-          _logger.LogDebug($"{change.OperationType} on {change.DocumentKey}");
-
-        });
-      }
-    }
     #endregion
-
-    public void Dispose()
-    {
-      _watcher?.Dispose();
-    }
   }
 }

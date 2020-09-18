@@ -18,6 +18,11 @@ namespace StorageApi.Tests.Integration
       return TestDataHelper.NewLocation();
     }
 
+    protected override LocationInsertUpdateModel GetUpdateModel()
+    {
+      return TestDataHelper.UpdatedLocation();
+    }
+
     #endregion
   }
 }

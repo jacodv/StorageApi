@@ -119,7 +119,7 @@ namespace StorageApi.Tests
       var postResult = await _crudController.Post(newItem);
 
       // Assert
-      (postResult as OkResult).Should().NotBeNull();
+      postResult.Value.Should().NotBeNull();
       listOfItems.Count.Should().Be(1);
     }
 
@@ -138,10 +138,10 @@ namespace StorageApi.Tests
         });
 
       // Action
-      var locationResult = await _crudController.Put(itemSetup.Id.ToString(), existingItem);
+      var updateResult = await _crudController.Put(itemSetup.Id.ToString(), existingItem);
 
       // Assert
-      (locationResult as OkResult).Should().NotBeNull();
+      updateResult.Value.Should().NotBeNull();
       existingItem.Name.Should().Be(itemSetup.Name);
     }
 
@@ -159,10 +159,10 @@ namespace StorageApi.Tests
         .Callback<string>(id => listOfItems.Remove(id));
 
       // Action
-      var locationResult = await _crudController.Delete(itemSetup.Id.ToString());
+      var deleteResult = await _crudController.Delete(itemSetup.Id.ToString());
 
       // Assert
-      (locationResult as OkResult).Should().NotBeNull();
+      deleteResult.Value.Should().NotBeNull();
       listOfItems.Count.Should().Be(0);
     }
 

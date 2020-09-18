@@ -82,7 +82,42 @@ namespace StorageApi.Tests.Integration
     }
 
     [Fact]
-    public async Task Post_GivenNewItem_ShouldReturnItem()
+    public async Task Full_CRUD_ShouldInsertUpdateAndDelete()
+    {
+      //INSERT TESTS
+      var insertedItem  = await _insertTest();
+
+      //UPDATE TESTS
+      var updatedItem = await _updateTest(insertedItem.Id);
+      updatedItem.Name.Should().NotBe(insertedItem.Name);
+
+      //DELETE TESTS
+      await _deleteAndValidate(insertedItem.Id, BaseUrl);
+    }
+
+    private async Task<TModel> _updateTest(string id)
+    {
+      //Setup
+      var updateItem = GetUpdateModel();
+
+      //Action
+      var updatedItem = await _put<TModel>($"{BaseUrl}/{id}", updateItem);
+
+      //Assert
+      updatedItem.Should().NotBeNull();
+      return updatedItem;
+    }
+
+    #region Abstract
+
+    protected abstract TInsUpdModel GetInsertModel();
+    protected abstract TInsUpdModel GetUpdateModel();
+
+    #endregion
+
+    #region shared
+
+    protected async Task<TModel> _insertTest()
     {
       // Setup
       var newItem = GetInsertModel();
@@ -92,15 +127,8 @@ namespace StorageApi.Tests.Integration
 
       //Assert
       insertedItem.Should().NotBeNull();
+      return insertedItem;
     }
-
-    #region Abstract
-
-    protected abstract TInsUpdModel GetInsertModel();
-
-    #endregion
-
-    #region shared
     protected static async Task<T> _evaluateResponse<T>(HttpResponseMessage response)
     {
       if (response.IsSuccessStatusCode)

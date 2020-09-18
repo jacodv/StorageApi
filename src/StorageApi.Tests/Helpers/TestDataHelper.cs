@@ -13,5 +13,13 @@ namespace StorageApi.Tests.Helpers
         .Build();
     }
     #endregion
+
+    public static LocationInsertUpdateModel UpdatedLocation()
+    {
+      return Builder<LocationInsertUpdateModel>
+        .CreateNew()
+        .With(_=>_.Name="UpdatedName")
+        .Build();
+    }
   }
 }

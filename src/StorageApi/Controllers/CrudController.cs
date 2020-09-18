@@ -40,34 +40,36 @@ namespace StorageApi.Controllers
 
     // POST api/<LocationController>
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] TUpInsModel model)
+    public async Task<ActionResult<TModel>> Post([FromBody] TUpInsModel model)
     {
       if (!ModelState.IsValid)
         return BadRequest(ModelState);
 
-      await _repository.InsertOneAsync(_mapper.Map<TUpInsModel, TDal>(model));
-      return Ok();
+      var insertedItem = await _repository.InsertOneAsync(_mapper.Map<TUpInsModel, TDal>(model));
+      return _mapper.Map<TDal,TModel>(insertedItem);
     }
 
     // PUT api/<LocationController>/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> Put(string id, [FromBody] TUpInsModel model)
+    public async Task<ActionResult<TModel>> Put(string id, [FromBody] TUpInsModel model)
     {
       if (!ModelState.IsValid)
         return BadRequest(ModelState);
 
       var itemToUpdate = _mapper.Map<TUpInsModel, TDal>(model);
       itemToUpdate.Id = ObjectId.Parse(id);
-      await _repository.ReplaceOneAsync(itemToUpdate);
-      return Ok();
+      var updatedItem = await _repository.ReplaceOneAsync(itemToUpdate);
+      return _mapper.Map<TDal, TModel>(updatedItem);
     }
 
     // DELETE api/<LocationController>/5
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
+    public async Task<ActionResult<TModel>> Delete(string id)
     {
-      await _repository.DeleteByIdAsync(id);
-      return Ok();
+      var deletedItem =  await _repository.DeleteByIdAsync(id);
+      if (deletedItem == null)
+        return NotFound(id);
+      return _mapper.Map<TDal, TModel>(deletedItem);
     }
   }
 }

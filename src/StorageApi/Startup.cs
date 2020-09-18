@@ -10,10 +10,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Repositories;
 using MongoDB.Repositories.Interfaces;
+using MongoDB.Repositories.Services;
 using MongoDB.Repositories.Settings;
 using Serilog;
 using StorageApi.Data;
-using StorageApi.Models;
 using StorageApi.Services;
 
 namespace StorageApi
@@ -40,6 +40,8 @@ namespace StorageApi
       });
       services.AddAutoMapper(typeof(Startup));
       services.AddScoped<IUserSession>(provider => new UserSession());
+
+      //services.AddHostedService<AuditHostedService>();
 
       services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
 
