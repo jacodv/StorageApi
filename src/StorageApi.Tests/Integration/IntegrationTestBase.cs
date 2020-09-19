@@ -27,6 +27,7 @@ namespace StorageApi.Tests.Integration
     protected HttpClient AnonClient;
     protected string BaseUrl { get; }
     protected readonly ILogger Output;
+    private object _locker = new object();
 
     protected IntegrationTestBase(string baseUrl, ITestOutputHelper output)
     {
@@ -51,7 +52,10 @@ namespace StorageApi.Tests.Integration
       using (var scope = Host.Services.CreateScope())
       {
         //Do the migration asynchronously
-        DemoDataHelper.Populate(scope.ServiceProvider).Wait();
+        lock (_locker)
+        {
+          DemoDataHelper.Populate(scope.ServiceProvider).Wait();
+        }
       }
       AnonClient = Host.GetTestClient();
       Client = Host.GetTestClient();
@@ -88,8 +92,11 @@ namespace StorageApi.Tests.Integration
       var insertedItem  = await _insertTest();
 
       //UPDATE TESTS
-      var updatedItem = await _updateTest(insertedItem.Id);
-      updatedItem.Name.Should().NotBe(insertedItem.Name);
+      if (_testUpdate)
+      {
+        var updatedItem = await _updateTest(insertedItem.Id);
+        updatedItem.Name.Should().NotBe(insertedItem.Name);
+      }
 
       //DELETE TESTS
       await _deleteAndValidate(insertedItem.Id, BaseUrl);
@@ -107,17 +114,7 @@ namespace StorageApi.Tests.Integration
       updatedItem.Should().NotBeNull();
       return updatedItem;
     }
-
-    #region Abstract
-
-    protected abstract TInsUpdModel GetInsertModel();
-    protected abstract TInsUpdModel GetUpdateModel();
-
-    #endregion
-
-    #region shared
-
-    protected async Task<TModel> _insertTest()
+    private async Task<TModel> _insertTest()
     {
       // Setup
       var newItem = GetInsertModel();
@@ -129,6 +126,16 @@ namespace StorageApi.Tests.Integration
       insertedItem.Should().NotBeNull();
       return insertedItem;
     }
+
+    #region Abstract
+
+    protected abstract TInsUpdModel GetInsertModel();
+    protected abstract TInsUpdModel GetUpdateModel();
+
+    #endregion
+
+    #region shared
+
     protected static async Task<T> _evaluateResponse<T>(HttpResponseMessage response)
     {
       if (response.IsSuccessStatusCode)
@@ -172,6 +179,8 @@ namespace StorageApi.Tests.Integration
     {
       return await Client.GetStringToItem<T>($"{BaseUrl}/{id}");
     }
+
+    protected bool _testUpdate = true;
     #endregion
 
     #region IDispose

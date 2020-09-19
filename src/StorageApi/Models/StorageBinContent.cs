@@ -2,7 +2,6 @@
 using AutoMapper;
 using FluentValidation;
 using MongoDB.Bson.Serialization.Attributes;
-using StorageApi.Interfaces;
 
 namespace StorageApi.Models
 {

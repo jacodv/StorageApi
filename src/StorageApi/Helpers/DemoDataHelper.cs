@@ -38,7 +38,7 @@ namespace StorageApi.Helpers
       {
         Name = DemoStorageUnitName,
         Location = demoLocation.ToReference(),
-        StorageRows = new List<StorageRow>()
+        Rows = new List<StorageRow>()
         {
           new StorageRow()
           {

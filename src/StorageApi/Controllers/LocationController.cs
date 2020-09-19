@@ -16,7 +16,8 @@ namespace StorageApi.Controllers
     public LocationController(IRepository<Location> locations, IMapper mapper, ILogger<LocationController> logger)
     : base(locations, mapper, logger)
     {
-      
-    }  
+
+    }
   }
 }
+

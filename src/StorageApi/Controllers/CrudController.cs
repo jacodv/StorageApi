@@ -55,11 +55,17 @@ namespace StorageApi.Controllers
     {
       if (!ModelState.IsValid)
         return BadRequest(ModelState);
+      ValidateUpdateModel(model);
 
       var itemToUpdate = _mapper.Map<TUpInsModel, TDal>(model);
       itemToUpdate.Id = ObjectId.Parse(id);
       var updatedItem = await _repository.ReplaceOneAsync(itemToUpdate);
       return _mapper.Map<TDal, TModel>(updatedItem);
+    }
+
+    protected virtual void ValidateUpdateModel(TUpInsModel model)
+    {
+      
     }
 
     // DELETE api/<LocationController>/5

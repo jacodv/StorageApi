@@ -31,13 +31,13 @@ namespace StorageApi.Models
   public class StorageBinInsertUpdateModel:IHasName
   {
     public string Name { get; set; }
-    public List<StorageBinContentModel> Contents { get; set; }
+    public List<StorageBinContentInsertUpdateModel> Contents { get; set; }
   }
 
-  public class StorageBinModel: StorageBinInsertUpdateModel
+  public class StorageBinModel: DocumentReferenceModel
   {
-    public string Id { get; set; }
     public double Weight { get; set; }
+    public List<StorageBinContentModel> Contents { get; set; }
   }
 
   public class StorageBinValidator : AbstractValidator<StorageBinInsertUpdateModel>
@@ -53,7 +53,7 @@ namespace StorageApi.Models
     public StorageBinProfile()
     {
       CreateMap<StorageBin, StorageBinModel>();
-      CreateMap<StorageBinContentInsertUpdateModel, StorageBin>()
+      CreateMap<StorageBinInsertUpdateModel, StorageBin>()
         .ForMember(
           _ => _.Id,
           opt => opt.Ignore())

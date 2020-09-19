@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Repositories;
@@ -28,9 +29,9 @@ namespace StorageApi.Tests
     private TController _crudController;
     private Mock<IRepository<TDal>> _mockRepository;
 
-    protected ControllerTestBase(ITestOutputHelper output, Profile mapperProfile)
+    protected ControllerTestBase(ITestOutputHelper output, params Profile[] mapperProfile)
     {
-      var mapperConfiguration = new MapperConfiguration(cfg => cfg.AddProfile(mapperProfile));
+      var mapperConfiguration = new MapperConfiguration(cfg => cfg.AddProfiles(mapperProfile));
       _mapper = new Mapper(mapperConfiguration);
 
       var serilogLogger = new LoggerConfiguration()
@@ -126,6 +127,9 @@ namespace StorageApi.Tests
     [Fact]
     public async Task Put_GivenExistingItem_Should_Update()
     {
+      if (!_testPut)
+        return;
+
       var itemSetup = NewItem();
       var existingItem = ToBeUpdatedItem();
 
@@ -172,6 +176,7 @@ namespace StorageApi.Tests
     protected abstract TDal NewItem();
     protected abstract TInsUpdateModel ToBeInsertedItem();
     protected abstract TInsUpdateModel ToBeUpdatedItem();
+    protected bool _testPut = true;
 
     #endregion
   }
