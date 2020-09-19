@@ -41,8 +41,6 @@ namespace StorageApi
       services.AddAutoMapper(typeof(Startup));
       services.AddScoped<IUserSession>(provider => new UserSession());
 
-      //services.AddHostedService<AuditHostedService>();
-
       services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
 
       services.AddControllers()

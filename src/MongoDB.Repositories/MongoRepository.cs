@@ -8,7 +8,6 @@ using MongoDB.Driver;
 using MongoDB.Repositories.Attributes;
 using MongoDB.Repositories.Interfaces;
 using Microsoft.Extensions.Logging;
-using MongoDB.Repositories.Services;
 
 namespace MongoDB.Repositories
 {
@@ -28,9 +27,6 @@ namespace MongoDB.Repositories
       var database = new MongoClient(settings.ConnectionString).GetDatabase(settings.DatabaseName);
       var collectionName = GetCollectionName(typeof(TDocument));
       Collection = database.GetCollection<TDocument>(collectionName);
-      //_logger.LogInformation($"Adding collection audit: {collectionName}");
-      //auditService.AddCollectionToAudit(Collection);
-      //_logger.LogInformation($"Added collection audit: {collectionName}");
     }
 
     private protected string GetCollectionName(Type documentType)
