@@ -36,15 +36,7 @@ namespace StorageApi.Models
       }
       return storageRows;
     }
-    public List<ObjectId> GetBinIds()
-    {
-      return Rows
-        .SelectMany(row => row.StorageColumns)
-        .Where(w=>w.Bin!=null)
-        .Select(col=>col.Bin.Id)
-        .ToList();
-    }
-
+    
     public DocumentReference GetAssignedBin(int rowIndex, int columnIndex)
     {
       if(Rows==null || Rows.Count-1<rowIndex)
