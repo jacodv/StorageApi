@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Repositories.Interfaces;
-using StorageApi.Interfaces;
 using StorageApi.Models;
 
 namespace StorageApi.Helpers

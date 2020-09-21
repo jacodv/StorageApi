@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using AutoMapper;
 using FluentValidation;
-using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Repositories;
 using MongoDB.Repositories.Attributes;

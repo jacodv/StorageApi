@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Repositories;
 using MongoDB.Repositories.Interfaces;
-using MongoDB.Repositories.Services;
 using MongoDB.Repositories.Settings;
 using Serilog;
 using StorageApi.Data;
