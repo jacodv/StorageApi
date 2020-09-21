@@ -24,9 +24,17 @@ namespace StorageApi.Models
 
     public static List<StorageRow> FromLayout(int rows, int columnsPerRow)
     {
-      var result = new List<StorageRow>(rows);
-      result.ForEach(row=>row.StorageColumns=new List<StorageColumn>(columnsPerRow));
-      return result;
+      var storageRows = new List<StorageRow>();
+      for (var rowIndex = 0; rowIndex < rows; rowIndex++)
+      {
+        var row = new StorageRow(){Index = rowIndex};
+        for (var columnIndex = 0; columnIndex < columnsPerRow; columnIndex++)
+        {
+          row.StorageColumns.Add(new StorageColumn(){Index = columnIndex});
+        }
+        storageRows.Add(row);
+      }
+      return storageRows;
     }
     public List<ObjectId> GetBinIds()
     {

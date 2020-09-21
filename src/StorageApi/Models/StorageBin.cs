@@ -72,6 +72,14 @@ namespace StorageApi.Models
     public int ColumnIndex { get; set; }
   }
 
+  public class AssignStorageBinModel
+  {
+    public string UnitId { get; set; }
+    public string BinId { get; set; }
+    public int RowIndex { get; set; }
+    public int ColumnIndex { get; set; }
+  }
+
   public class StorageBinValidator : AbstractValidator<StorageBinInsertUpdateModel>
   {
     public StorageBinValidator()
