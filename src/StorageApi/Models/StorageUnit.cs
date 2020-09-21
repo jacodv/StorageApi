@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using FluentValidation;
+using MongoDB.Bson;
 using MongoDB.Repositories;
 using MongoDB.Repositories.Attributes;
 using MongoDB.Repositories.Interfaces;
+using StorageApi.Helpers;
 using StorageApi.Interfaces;
 
 namespace StorageApi.Models
@@ -23,6 +27,40 @@ namespace StorageApi.Models
       var result = new List<StorageRow>(rows);
       result.ForEach(row=>row.StorageColumns=new List<StorageColumn>(columnsPerRow));
       return result;
+    }
+    public List<ObjectId> GetBinIds()
+    {
+      return Rows
+        .SelectMany(row => row.StorageColumns)
+        .Where(w=>w.Bin!=null)
+        .Select(col=>col.Bin.Id)
+        .ToList();
+    }
+
+    public DocumentReference GetAssignedBin(int rowIndex, int columnIndex)
+    {
+      if(Rows==null || Rows.Count-1<rowIndex)
+        throw new ArgumentOutOfRangeException(nameof(rowIndex), $"Invalid rowIndex:{rowIndex}");
+
+      if (Rows[rowIndex].StorageColumns==null || Rows[rowIndex].StorageColumns.Count - 1 < columnIndex)
+        throw new ArgumentOutOfRangeException(nameof(columnIndex), $"Invalid columnIndex:{columnIndex} for rowIndex:{rowIndex}");
+
+      return Rows[rowIndex].StorageColumns[columnIndex].Bin;
+    }
+    public StorageBin AssignBin(StorageBin bin, int rowIndex, int columnIndex)
+    {
+      if (bin == null) 
+        throw new ArgumentNullException(nameof(bin));
+      
+      if (Rows == null || Rows.Count - 1 < rowIndex)
+        throw new ArgumentOutOfRangeException(nameof(rowIndex), $"Invalid rowIndex:{rowIndex}");
+
+      if (Rows[rowIndex].StorageColumns == null || Rows[rowIndex].StorageColumns.Count - 1 < columnIndex)
+        throw new ArgumentOutOfRangeException(nameof(columnIndex), $"Invalid columnIndex:{columnIndex} for rowIndex:{rowIndex}");
+
+      bin.StorageBinLocation  = StorageBinLocation.FromUnit(this, rowIndex, columnIndex);
+      Rows[rowIndex].StorageColumns[columnIndex].Bin = bin.ToReference();
+      return bin;
     }
   }
 

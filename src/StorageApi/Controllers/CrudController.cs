@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
@@ -13,9 +15,9 @@ namespace StorageApi.Controllers
   public abstract class CrudController<TDal, TModel, TUpInsModel> : ControllerBase
     where TDal:Document
   {
-    private readonly IRepository<TDal> _repository;
-    private readonly IMapper _mapper;
-    private readonly ILogger<CrudController<TDal, TModel, TUpInsModel>> _logger;
+    protected readonly IRepository<TDal> _repository;
+    protected readonly IMapper _mapper;
+    protected readonly ILogger<CrudController<TDal, TModel, TUpInsModel>> _logger;
 
     protected CrudController(IRepository<TDal> repository, IMapper mapper, ILogger<CrudController<TDal, TModel, TUpInsModel>> logger)
     {
@@ -35,15 +37,18 @@ namespace StorageApi.Controllers
     [HttpGet("{id}")]
     public async Task<TModel> Get(string id)
     {
+      if (string.IsNullOrEmpty(id)) 
+        throw new ArgumentNullException(nameof(id));
+
       return _mapper.Map<TDal, TModel>(await _repository.FindByIdAsync(id));
     }
 
     // POST api/<LocationController>
     [HttpPost]
-    public async Task<ActionResult<TModel>> Post([FromBody] TUpInsModel model)
+    public async Task<TModel> Post([FromBody] TUpInsModel model)
     {
-      if (!ModelState.IsValid)
-        return BadRequest(ModelState);
+      if (model == null) 
+        throw new ArgumentNullException(nameof(model));
 
       var insertedItem = await _repository.InsertOneAsync(_mapper.Map<TUpInsModel, TDal>(model));
       return _mapper.Map<TDal,TModel>(insertedItem);
@@ -51,15 +56,20 @@ namespace StorageApi.Controllers
 
     // PUT api/<LocationController>/5
     [HttpPut("{id}")]
-    public async Task<ActionResult<TModel>> Put(string id, [FromBody] TUpInsModel model)
+    public async Task<TModel> Put(string id, [FromBody] TUpInsModel model)
     {
-      if (!ModelState.IsValid)
-        return BadRequest(ModelState);
+      if (id == null) 
+        throw new ArgumentNullException(nameof(id));
+      if (model == null)
+        throw new ArgumentNullException(nameof(model));
+
       ValidateUpdateModel(model);
 
       var itemToUpdate = _mapper.Map<TUpInsModel, TDal>(model);
       itemToUpdate.Id = ObjectId.Parse(id);
       var updatedItem = await _repository.ReplaceOneAsync(itemToUpdate);
+      if(updatedItem==null)
+        throw new ArgumentOutOfRangeException(nameof(id));
       return _mapper.Map<TDal, TModel>(updatedItem);
     }
 
@@ -70,11 +80,14 @@ namespace StorageApi.Controllers
 
     // DELETE api/<LocationController>/5
     [HttpDelete("{id}")]
-    public async Task<ActionResult<TModel>> Delete(string id)
+    public async Task<TModel> Delete(string id)
     {
+      if (id == null) 
+        throw new ArgumentNullException(nameof(id));
+      
       var deletedItem =  await _repository.DeleteByIdAsync(id);
       if (deletedItem == null)
-        return NotFound(id);
+        return default(TModel);
       return _mapper.Map<TDal, TModel>(deletedItem);
     }
   }

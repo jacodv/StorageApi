@@ -16,7 +16,7 @@ namespace StorageApi.Models
     public double UnitWeight { get; set; }
     [BsonIgnore]
     public double TotalWeight => Quantity * UnitWeight;
-
+    public bool IsImperial { get; set; }
     public List<string> Tags { get; set; }
   }
 
@@ -29,6 +29,7 @@ namespace StorageApi.Models
     public string Name { get; set; }
     public int Quantity { get; set; }
     public double UnitWeight { get; set; }
+    public bool IsImperial { get; set; }
     public List<string> Tags { get; set; }
   }
 

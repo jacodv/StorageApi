@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using AutoMapper;
 using FluentValidation;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Repositories;
 using MongoDB.Repositories.Attributes;
 using MongoDB.Repositories.Interfaces;
+using StorageApi.Helpers;
 using StorageApi.Interfaces;
 
 namespace StorageApi.Models
@@ -26,6 +29,26 @@ namespace StorageApi.Models
         return Contents?.Sum(_ => _.TotalWeight) ?? 0;
       }
     }
+    public StorageBinLocation StorageBinLocation { get; set; }
+  }
+
+  public class StorageBinLocation
+  {
+    public DocumentReference Unit { get; set; }
+    public DocumentReference Location { get; set; }
+    public int RowIndex { get; set; }
+    public int ColumnIndex { get; set; }
+
+    public static StorageBinLocation FromUnit(StorageUnit unit, int rowIndex, int columnIndex)
+    {
+      return new StorageBinLocation()
+      {
+        Unit = unit.ToReference(),
+        Location = unit.Location,
+        RowIndex = rowIndex,
+        ColumnIndex = columnIndex
+      };
+    }
   }
 
   public class StorageBinInsertUpdateModel:IHasName
@@ -38,6 +61,15 @@ namespace StorageApi.Models
   {
     public double Weight { get; set; }
     public List<StorageBinContentModel> Contents { get; set; }
+    public StorageBinLocationModel StorageBinLocation { get; set; }
+  }
+
+  public class StorageBinLocationModel
+  {
+    public DocumentReferenceModel Unit { get; set; }
+    public DocumentReferenceModel Location { get; set; }
+    public int RowIndex { get; set; }
+    public int ColumnIndex { get; set; }
   }
 
   public class StorageBinValidator : AbstractValidator<StorageBinInsertUpdateModel>
@@ -52,6 +84,8 @@ namespace StorageApi.Models
   {
     public StorageBinProfile()
     {
+      CreateMap<StorageBinLocation, StorageBinLocationModel>()
+        .ReverseMap();
       CreateMap<StorageBin, StorageBinModel>();
       CreateMap<StorageBinInsertUpdateModel, StorageBin>()
         .ForMember(

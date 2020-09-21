@@ -25,9 +25,10 @@ namespace StorageApi.Tests
     where TInsUpdateModel : IHasName
     where TController : CrudController<TDal, TModel, TInsUpdateModel>
   {
-    private readonly Mapper _mapper;
-    private TController _crudController;
-    private Mock<IRepository<TDal>> _mockRepository;
+    protected readonly Mapper _mapper;
+    protected TController _crudController;
+    protected Mock<IRepository<TDal>> _mockRepository;
+    protected ILogger<TController> _logger;
 
     protected ControllerTestBase(ITestOutputHelper output, params Profile[] mapperProfile)
     {
@@ -42,7 +43,7 @@ namespace StorageApi.Tests
       var loggerFactory = (ILoggerFactory)new LoggerFactory();
       loggerFactory.AddSerilog(serilogLogger);
 
-      var logger = loggerFactory.CreateLogger<TController>();
+      _logger = loggerFactory.CreateLogger<TController>();
       _mockRepository = new Mock<IRepository<TDal>>(MockBehavior.Strict);
 
       _crudController = (TController)Activator
@@ -50,9 +51,9 @@ namespace StorageApi.Tests
           typeof(TController),
           new object[]
           {
-            _mockRepository.Object,
-            _mapper,
-            logger
+              _mockRepository.Object,
+              _mapper,
+              _logger
           });
     }
 
@@ -103,6 +104,16 @@ namespace StorageApi.Tests
       locationResult.Should().NotBeNull();
       locationResult.Name.Should().Be(itemSetup.Name);
     }
+    [Fact]
+    public void Get_NoId_Should_Throw()
+    {
+      // Action
+      Action action = ()=> _crudController.Get("").Wait();
+
+      // Assert
+      action.Should().Throw<ArgumentNullException>();
+    }
+
 
     [Fact]
     public async Task Post_GivenNewItem_Should_ReturnInsert()
@@ -120,8 +131,17 @@ namespace StorageApi.Tests
       var postResult = await _crudController.Post(newItem);
 
       // Assert
-      postResult.Value.Should().NotBeNull();
+      postResult.Should().NotBeNull();
       listOfItems.Count.Should().Be(1);
+    }
+    [Fact]
+    public void Post_GivenNoItem_Should_Throw()
+    {
+      // Action
+      Action action = ()=> _crudController.Post(default(TInsUpdateModel)).Wait();
+
+      // Assert
+      action.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -145,8 +165,51 @@ namespace StorageApi.Tests
       var updateResult = await _crudController.Put(itemSetup.Id.ToString(), existingItem);
 
       // Assert
-      updateResult.Value.Should().NotBeNull();
+      updateResult.Should().NotBeNull();
       existingItem.Name.Should().Be(itemSetup.Name);
+    }
+    [Fact]
+    public void Put_NoId_Should_Throw()
+    {
+      if (!_testPut)
+        return;
+
+      // Action
+      Action action =()=> _crudController.Put("", default(TInsUpdateModel)).Wait();
+
+      // Assert
+      action.Should().Throw<ArgumentNullException>();
+    }
+    [Fact]
+    public void Put_NoModel_Should_Throw()
+    {
+      if (!_testPut)
+        return;
+
+      // Action
+      Action action = () => _crudController.Put("<<SomeId>>", default(TInsUpdateModel)).Wait();
+
+      // Assert
+      action.Should().Throw<ArgumentNullException>();
+    }
+    [Fact]
+    public void Put_GivenInValidId_Should_Throw()
+    {
+      if (!_testPut)
+        return;
+
+      var itemSetup = NewItem();
+      var existingItem = ToBeUpdatedItem();
+
+      _mockRepository
+        .Setup(mc => mc.ReplaceOneAsync(It.IsAny<TDal>()))
+        .Returns(Task.FromResult(default(TDal)));
+
+      // Action
+      Action action = ()=> _crudController.Put(itemSetup.Id.ToString(), existingItem).Wait();
+
+      // Assert
+      action.Should().Throw<ArgumentOutOfRangeException>();
     }
 
     [Fact]
@@ -166,8 +229,18 @@ namespace StorageApi.Tests
       var deleteResult = await _crudController.Delete(itemSetup.Id.ToString());
 
       // Assert
-      deleteResult.Value.Should().NotBeNull();
+      deleteResult.Should().NotBeNull();
       listOfItems.Count.Should().Be(0);
+    }
+    public void Delete_GivenNoId_Should_Throw()
+    {
+      //Setup
+      
+      // Action
+      Action action =()=> _crudController.Delete("").Wait();
+
+      // Assert
+      action.Should().Throw<ArgumentNullException>();
     }
 
     #region Abstract
