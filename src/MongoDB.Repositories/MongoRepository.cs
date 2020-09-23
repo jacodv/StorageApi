@@ -159,7 +159,7 @@ namespace MongoDB.Repositories
     {
       document.CreatedBy = _userSession.GetUserName();
       document.UpdatedAt = null;
-      document.CreatedBy = null;
+      document.UpdatedBy = null;
     }
     private void _setUpdateState(TDocument document)
     {
