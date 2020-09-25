@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -69,7 +70,7 @@ namespace MongoDB.Repositories.Tests
     }
 
     [Fact]
-    public void InsertOne_GivenValidItem_ShouldSetCreatedBy()
+    public async Task InsertOne_GivenValidItem_ShouldSetCreatedBy()
     {
       //Setup
       var testName = "InsertOne_GivenValidItem_ShouldSetCreatedBy";
@@ -81,7 +82,7 @@ namespace MongoDB.Repositories.Tests
         .Returns(testName);
 
       //Action
-      var insertedItem = _toDoRepositoryFixture.TodoRepository.InsertOne(newItem);
+      var insertedItem = await _toDoRepositoryFixture.TodoRepository.InsertOneAsync(newItem);
 
       //Assert
       _toDoRepositoryFixture.Logger.LogDebug(JsonConvert.SerializeObject(insertedItem));
