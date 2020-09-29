@@ -49,8 +49,7 @@ namespace MongoDB.Repositories
     {
       return Task.Run(() =>
       {
-        var objectId = new ObjectId(id);
-        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
+        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, id);
         return Collection.Find(filter).SingleOrDefaultAsync();
       });
     }
@@ -86,8 +85,7 @@ namespace MongoDB.Repositories
     }
     public async Task<TDocument> DeleteByIdAsync(string id)
     {
-        var objectId = new ObjectId(id);
-        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
+        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, id);
         return await Collection.FindOneAndDeleteAsync(filter);
     }
     public async Task<long> DeleteManyAsync(Expression<Func<TDocument, bool>> filterExpression)

@@ -65,7 +65,7 @@ namespace StorageApi.Controllers
       ValidateUpdateModel(model);
 
       var itemToUpdate = _mapper.Map<TUpInsModel, TDal>(model);
-      itemToUpdate.Id = ObjectId.Parse(id);
+      itemToUpdate.Id = id;
       var updatedItem = await _repository.ReplaceOneAsync(itemToUpdate);
       if(updatedItem==null)
         throw new ArgumentOutOfRangeException(nameof(id));

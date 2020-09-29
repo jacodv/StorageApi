@@ -25,10 +25,7 @@ namespace StorageApi.Models
     public DocumentReferenceProfile()
     {
       CreateMap<DocumentReference, DocumentReferenceModel>()
-        .ReverseMap()
-        .ForMember(
-          _=>_.Id,
-          opt=>opt.MapFrom(x=>ObjectId.Parse(x.Id)));
+        .ReverseMap();
     }
   }
 }

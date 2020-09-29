@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using AutoMapper;
 using FluentValidation;
 using MongoDB.Repositories;
 using MongoDB.Repositories.Attributes;
@@ -20,6 +21,7 @@ namespace StorageApi.Models
   {
     public string Name { get; set; }
   }
+
 
   public class LocationValidator : AbstractValidator<LocationInsertUpdateModel>
   {
