@@ -10,9 +10,9 @@ namespace StorageApi.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class LocationController : CrudController<Location, LocationModel, LocationInsertUpdateModel>
+  public class LocationController : CrudController<StorageLocation, StorageLocationModel, StorageLocationInsertUpdateModel>
   {
-    public LocationController(IRepository<Location> locations, IMapper mapper, ILogger<LocationController> logger)
+    public LocationController(IRepository<StorageLocation> locations, IMapper mapper, ILogger<LocationController> logger)
     : base(locations, mapper, logger)
     {
 

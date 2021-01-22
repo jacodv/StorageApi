@@ -15,14 +15,14 @@ namespace StorageApi.Helpers
     
     public static async Task Populate(IServiceProvider serviceProvider)
     {
-      await BuildLocation(serviceProvider.GetService<IRepository<Location>>());
+      await BuildLocation(serviceProvider.GetService<IRepository<StorageLocation>>());
       await BuildDemoBin(serviceProvider.GetService<IRepository<StorageBin>>());
-      await BuildDemoStorageUnit(serviceProvider.GetService<IRepository<Location>>(),
+      await BuildDemoStorageUnit(serviceProvider.GetService<IRepository<StorageLocation>>(),
         serviceProvider.GetService<IRepository<StorageBin>>(),
         serviceProvider.GetService<IRepository<StorageUnit>>());
     }
 
-    private static async Task BuildDemoStorageUnit(IRepository<Location> locations, IRepository<StorageBin> bins, IRepository<StorageUnit> storageUnits)
+    private static async Task BuildDemoStorageUnit(IRepository<StorageLocation> locations, IRepository<StorageBin> bins, IRepository<StorageUnit> storageUnits)
     {
       var item = await storageUnits.FindOneAsync(_ => _.Name == DemoStorageUnitName);
       if (item != null)
@@ -107,13 +107,13 @@ namespace StorageApi.Helpers
       };
       await storageUnits.InsertOneAsync(item);
     }
-    private static async Task BuildLocation(IRepository<Location> locations)
+    private static async Task BuildLocation(IRepository<StorageLocation> locations)
     {
       var item = await locations.FindOneAsync(_ => _.Name == DemoLocationName);
       if (item != null)
         return;
 
-      item = new Location()
+      item = new StorageLocation()
       {
         Name = DemoLocationName
       };

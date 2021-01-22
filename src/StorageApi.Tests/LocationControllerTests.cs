@@ -6,34 +6,34 @@ using Xunit.Abstractions;
 
 namespace StorageApi.Tests
 {
-  public class LocationControllerTests : ControllerTestBase<Location, LocationModel, LocationInsertUpdateModel, LocationController>
+  public class LocationControllerTests : ControllerTestBase<StorageLocation, StorageLocationModel, StorageLocationInsertUpdateModel, LocationController>
   {
     public LocationControllerTests(ITestOutputHelper output)
-    : base(output, new LocationProfile())
+    : base(output, new StorageLocationProfile())
     {
 
     }
 
     #region Overrides
-    protected override IList<Location> AllItems(int count)
+    protected override IList<StorageLocation> AllItems(int count)
     {
-      return Builder<Location>.CreateListOfSize(count).Build();
+      return Builder<StorageLocation>.CreateListOfSize(count).Build();
     }
-    protected override Location NewItem()
+    protected override StorageLocation NewItem()
     {
-      return Builder<Location>
+      return Builder<StorageLocation>
         .CreateNew()
         .Build();
     }
-    protected override LocationInsertUpdateModel ToBeInsertedItem()
+    protected override StorageLocationInsertUpdateModel ToBeInsertedItem()
     {
-      return Builder<LocationInsertUpdateModel>
+      return Builder<StorageLocationInsertUpdateModel>
         .CreateNew()
         .Build();
     }
-    protected override LocationInsertUpdateModel ToBeUpdatedItem()
+    protected override StorageLocationInsertUpdateModel ToBeUpdatedItem()
     {
-      return new LocationInsertUpdateModel()
+      return new StorageLocationInsertUpdateModel()
       {
         Name = "UpdatedName"
       };

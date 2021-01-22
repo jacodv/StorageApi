@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using FizzWare.NBuilder;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Repositories.Interfaces;
 using Moq;
+using Newtonsoft.Json;
 using StorageApi.Controllers;
 using StorageApi.Models;
 using StorageApi.Tests.Helpers;
@@ -123,7 +125,7 @@ namespace StorageApi.Tests
       _mockRepository
         .Setup(mc => mc.FindByIdAsync(It.IsAny<string>()))
         .Returns<string>(binId=> 
-          Task.FromResult(existingBin.Id.Equals(ObjectId.Parse(binId)) ? 
+          Task.FromResult(existingBin.Id.Equals(binId) ? 
             existingBin : 
             expectedBin));
       _mockUnitRepository
@@ -131,7 +133,11 @@ namespace StorageApi.Tests
         .Returns<StorageUnit>(Task.FromResult);
       _mockRepository
         .Setup(mc => mc.ReplaceOneAsync(It.IsAny<StorageBin>()))
-        .Returns<StorageBin>(Task.FromResult);
+        .Returns<StorageBin>(bin=>
+        {
+          _logger.LogDebug(JsonConvert.SerializeObject(bin, Formatting.Indented));
+          return Task.FromResult(bin);
+        });
 
       //Action
       var assignedBin = await _controller.AssignBinToUnit(_mockUnitRepository.Object, model);
