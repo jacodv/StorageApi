@@ -13,14 +13,14 @@ namespace StorageApi.Data
   {
     public static async Task Init(IServiceProvider serviceProvider)
     {
-      await _createLocationIndexes(((MongoRepository<Location>)serviceProvider.GetService<IRepository<Location>>()).Collection);
+      await _createLocationIndexes(((MongoRepository<StorageLocation>)serviceProvider.GetService<IRepository<StorageLocation>>()).Collection);
       await _createStorageUnitIndexes(((MongoRepository<StorageUnit>)serviceProvider.GetService<IRepository<StorageUnit>>()).Collection);
       await _createBinIndexes(((MongoRepository<StorageBin>)serviceProvider.GetService<IRepository<StorageBin>>()).Collection);
     }
 
-    private static async Task _createLocationIndexes(IMongoCollection<Location> collection)
+    private static async Task _createLocationIndexes(IMongoCollection<StorageLocation> collection)
     {
-      var indexKeys = Builders<Location>.IndexKeys.Ascending(x => x.Name);
+      var indexKeys = Builders<StorageLocation>.IndexKeys.Ascending(x => x.Name);
       await _createIndex(collection, indexKeys, "location_name_1");
     }
 

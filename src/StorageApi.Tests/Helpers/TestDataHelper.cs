@@ -2,7 +2,6 @@
 using System.Linq;
 using FizzWare.NBuilder;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using StorageApi.Helpers;
 using StorageApi.Models;
 
@@ -10,19 +9,19 @@ namespace StorageApi.Tests.Helpers
 {
   public static class TestDataHelper
   {
-    public static Dictionary<ObjectId, Location> Locations;
-    public static Dictionary<ObjectId, StorageBin> Bins;
-    public static Dictionary<ObjectId, StorageUnit> Units;
+    public static Dictionary<string, StorageLocation> Locations;
+    public static Dictionary<string, StorageBin> Bins;
+    public static Dictionary<string, StorageUnit> Units;
 
-    public static LocationInsertUpdateModel NewLocation()
+    public static StorageLocationInsertUpdateModel NewLocation()
     {
-      return Builder<LocationInsertUpdateModel>
+      return Builder<StorageLocationInsertUpdateModel>
         .CreateNew()
         .Build();
     }
-    public static LocationInsertUpdateModel UpdatedLocation()
+    public static StorageLocationInsertUpdateModel UpdatedLocation()
     {
-      return Builder<LocationInsertUpdateModel>
+      return Builder<StorageLocationInsertUpdateModel>
         .CreateNew()
         .With(_=>_.Name="UpdatedName")
         .Build();
@@ -167,7 +166,7 @@ namespace StorageApi.Tests.Helpers
     }
     private static void _ensureLocations()
     {
-      var locations = Builder<Location>
+      var locations = Builder<StorageLocation>
         .CreateListOfSize(5)
         .Build().ToList();
       Locations = locations

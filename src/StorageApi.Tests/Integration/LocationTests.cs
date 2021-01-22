@@ -4,7 +4,7 @@ using Xunit.Abstractions;
 
 namespace StorageApi.Tests.Integration
 {
-  public class LocationTests : IntegrationTestBase<LocationModel, LocationInsertUpdateModel>
+  public class LocationTests : IntegrationTestBase<StorageLocationModel, StorageLocationInsertUpdateModel>
   {
     public LocationTests(ITestOutputHelper output)
     :base("api/location", output)
@@ -13,12 +13,12 @@ namespace StorageApi.Tests.Integration
 
     #region Overrides
 
-    protected override LocationInsertUpdateModel GetInsertModel()
+    protected override StorageLocationInsertUpdateModel GetInsertModel()
     {
       return TestDataHelper.NewLocation();
     }
 
-    protected override LocationInsertUpdateModel GetUpdateModel()
+    protected override StorageLocationInsertUpdateModel GetUpdateModel()
     {
       return TestDataHelper.UpdatedLocation();
     }

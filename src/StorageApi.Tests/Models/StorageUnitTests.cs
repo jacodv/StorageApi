@@ -89,7 +89,7 @@ namespace StorageApi.Tests.Models
       //Setup
       var expectedRowIndex = 2;
       var expectedColumnIndex = 2;
-      var location = Builder<Location>
+      var location = Builder<StorageLocation>
         .CreateNew()
         .Build();
       var bin = Builder<StorageBin>

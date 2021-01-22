@@ -4,3 +4,4 @@ obj
 *.suo
 /src/*.ncrunchsolution
 /src/.vs
+/src/_NCrunch_StorageApi

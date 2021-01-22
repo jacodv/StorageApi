@@ -1,8 +1,11 @@
 using System;
 using AutoMapper;
 using FluentValidation.AspNetCore;
+using HotChocolate.AspNetCore;
+using HotChocolate.AspNetCore.Voyager;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,6 +16,7 @@ using MongoDB.Repositories.Interfaces;
 using MongoDB.Repositories.Settings;
 using Serilog;
 using StorageApi.Data;
+using StorageApi.GraphQL;
 using StorageApi.Services;
 
 namespace StorageApi
@@ -52,6 +56,13 @@ namespace StorageApi
 
       // Register the Swagger generator, defining 1 or more Swagger documents
       services.AddSwaggerGen();
+
+      // Register the GraphQL implementation (HotChocolate)
+      services.AddGraphQLServer()
+        .AddQueryType<StorageApiQueryType>(d => 
+          d.Name("Query"))
+        .AddType<StorageUnitType>()
+        ;
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,9 +93,14 @@ namespace StorageApi
       app.UseRouting();
       app.UseAuthorization();
 
+      app
+        .UsePlayground(new PathString("/graphql"), new PathString("/ui/playground"))
+        .UseVoyager(new PathString("/graphql"), new PathString("/ui/voyager"));
+
       app.UseEndpoints(endpoints =>
       {
         endpoints.MapControllers();
+        endpoints.MapGraphQL();
       });
     }
   }

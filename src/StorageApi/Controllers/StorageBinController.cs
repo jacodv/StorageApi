@@ -47,7 +47,7 @@ namespace StorageApi.Controllers
       }
 
       // Clear previous
-      var unassignedBin = await _repository.FindByIdAsync(existingBin.Id.ToString());
+      var unassignedBin = await _repository.FindByIdAsync(existingBin.Id);
       unassignedBin.StorageBinLocation = null;
       await _repository.ReplaceOneAsync(unassignedBin);
 
